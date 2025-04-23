@@ -1,4 +1,5 @@
 version: 0.2
+
 phases:
   install:
     runtime-versions:
@@ -6,10 +7,10 @@ phases:
   build:
     commands:
       - echo "Zipping Lambda functions..."
-      - cd "Lambda Functions/index-photos"
-      - zip -r ../../index-photos.zip .
-      - cd ../search-photos
-      - zip -r ../../search-photos.zip .
+      - cd "Lambda Functions"
+      - zip ../index-photos.zip index-photos.py
+      - zip ../search-photos.zip search-photos.py
+
 artifacts:
   files:
     - index-photos.zip
