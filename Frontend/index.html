@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Photo Search</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
+      color: #fff;
+    }
+
+    header {
+      width: 100%;
+      background: #0b1e2d;
+      padding: 2rem 1rem;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .card h2 {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .card h2::before {
+      content: attr(data-icon);
+      margin-right: 0.5rem;
+      font-size: 1.2rem;
+    }
+
+    input[type="text"],
+    input[type="file"] {
+      width: 100%;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      background-color: #3b4d5e;
+      color: #fff;
+    }
+
+    input[type="text"]::placeholder {
+      color: #ccc;
+    }
+
+    button {
+      padding: 0.8rem 2rem;
+      background: linear-gradient(to right, #1dd1a1, #10ac84);
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      float: right;
+      transition: all 0.3s ease;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    button:hover:not(:disabled) {
+      background: linear-gradient(to right, #10ac84, #1dd1a1);
+      transform: scale(1.02);
+    }
+
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .image-card {
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 10px;
+      overflow: hidden;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .image-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .labels {
+      padding: 0.6rem;
+      font-size: 0.85rem;
+      color: #ddd;
+    }
+
+    #uploadStatus {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 3px solid #fff;
+      border-top: 3px solid transparent;
+      border-radius: 50%;
+      display: inline-block;
+      animation: spin 0.9s linear infinite;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Toast Styles */
+    .toast {
+      visibility: hidden;
+      min-width: 280px;
+      background-color: #f39c12;
+      color: white;
+      text-align: center;
+      border-radius: 5px;
+      padding: 12px 20px;
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 999;
+      font-size: 14px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .toast.show {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>📸 AI Photo Search & Upload</h1>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h2 data-icon="🔍">Search Photos</h2>
+      <input type="text" id="searchInput" placeholder="e.g. dogs, beach, birthday" />
+      <button onclick="searchPhotos()">Search</button>
+      <div style="clear: both;"></div>
+      <div id="results" class="image-grid"></div>
+    </div>
+
+    <div class="card">
+      <h2 data-icon="⬆️">Upload Photo</h2>
+      <input type="file" id="fileInput" />
+      <input type="text" id="labelInput" placeholder="Custom labels (comma separated)" />
+      <button id="uploadBtn" onclick="uploadPhoto()">Upload</button>
+      <div style="clear: both;"></div>
+      <p id="uploadStatus"></p>
+    </div>
+  </div>
+
+  <!-- Toast Popup -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const API_BASE = "https://acjehs4dj7.execute-api.us-east-1.amazonaws.com/dev";
+
+    let toastTimer;
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = `⚠️ ${message}`;
+      toast.classList.add('show');
+
+      if (toastTimer) clearTimeout(toastTimer);
+
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    async function searchPhotos() {
+      const query = document.getElementById('searchInput').value.trim();
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+
+      if (!query) {
+        showToast("Please enter a label to search.");
+        return;
+      }
+
+      const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+
+      if (data.results && data.results.length) {
+        data.results.forEach(photo => {
+          const card = document.createElement('div');
+          card.className = 'image-card';
+          card.innerHTML = `
+            <img src="${photo.url}" alt="Photo" />
+            <div class="labels">${photo.labels.join(', ')}</div>
+          `;
+          resultsDiv.appendChild(card);
+        });
+      } else {
+        resultsDiv.innerHTML = '<p style="color: #ccc;">No photos found.</p>';
+      }
+    }
+
+    async function uploadPhoto() {
+      const fileInput = document.getElementById('fileInput');
+      const labelInput = document.getElementById('labelInput');
+      const status = document.getElementById('uploadStatus');
+      const uploadBtn = document.getElementById('uploadBtn');
+
+      const file = fileInput.files[0];
+      if (!file) {
+        status.innerText = 'Please select a file.';
+        return;
+      }
+
+      const labels = labelInput.value.trim();
+      const filename = file.name;
+
+      uploadBtn.disabled = true;
+      uploadBtn.innerHTML = `<span class="spinner"></span> Uploading...`;
+      status.innerText = '';
+
+      try {
+        const res = await fetch(`${API_BASE}/upload`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': file.type,
+            'x-amz-meta-customLabels': labels,
+            'x-filename': filename
+          },
+          body: file
+        });
+
+        if (res.ok) {
+          status.innerText = '✅ Uploaded successfully!';
+          fileInput.value = '';
+          labelInput.value = '';
+        } else {
+          status.innerText = '❌ Upload failed. Check console.';
+          console.error(await res.text());
+        }
+      } catch (err) {
+        status.innerText = '❌ Upload error.';
+        console.error(err);
+      } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = `Upload`;
+      }
+    }
+  </script>
+
+</body>
+</html>
