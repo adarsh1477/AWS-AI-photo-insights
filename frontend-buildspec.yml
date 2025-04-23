@@ -1,0 +1,15 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 14
+  build:
+    commands:
+      - echo "Zipping frontend files..."
+      - cd Frontend
+      - zip -r ../frontend.zip .
+
+artifacts:
+  files:
+    - frontend.zip
