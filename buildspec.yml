@@ -7,9 +7,10 @@ phases:
   build:
     commands:
       - echo "Zipping Lambda functions..."
-      - cd "Lambda Functions"
-      - zip ../index-photos.zip "index-photos.py"
-      - zip ../search-photos.zip "search-photos.py"
+      - |
+        cd "Lambda Functions" && \
+        zip ../index-photos.zip index-photos.py && \
+        zip ../search-photos.zip search-photos.py
 
 artifacts:
   files:
