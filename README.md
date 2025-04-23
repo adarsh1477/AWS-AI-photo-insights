@@ -56,7 +56,7 @@ AWS-AI-photo-insights/ │ ├── Lambda Functions/ │ ├── index-photo
 ## 👨‍💻 Contributors
 
 - **Adarsh Rai** – Frontend, Lambda Integration, Deployment  
-- **Divyansh Agrawal ** – Lex, OpenSearch, API Gateway
+- **Divyansh Agrawal** – Lex, OpenSearch, API Gateway
 
 ---
 
