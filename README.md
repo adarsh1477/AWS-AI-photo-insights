@@ -13,8 +13,22 @@ An AI-powered photo search & upload system built with AWS Lambda, S3, Lex, Rekog
 
 ---
 
-## 📁 Project Structure
-AWS-AI-photo-insights/ │ ├── Lambda Functions/ │ ├── index-photos/ # Lambda: Indexes photo labels into OpenSearch │ └── search-photos/ # Lambda: Processes search queries using Lex & OpenSearch │ ├── Frontend/ │ └── index.html # Static UI for uploading and searching photos
+AWS-AI-photo-insights/
+│
+├── Lambda Functions/
+│   ├── index-photos/         # Lambda: Indexes photo labels into OpenSearch
+│   └── search-photos/        # Lambda: Processes search queries using Lex & OpenSearch
+│
+├── Frontend/
+│   └── index.html            # Static UI for uploading and searching photos
+│
+├── cloudformation/
+│   └── ai-photo-search.yaml  # CloudFormation template to create AWS resources
+│
+├── buildspec.yml             # Buildspec for backend (Lambda) CodePipeline
+├── frontend-buildspec.yml    # Buildspec for frontend (S3) CodePipeline
+├── README.md                 # Project documentation
+
 
 
 ---
