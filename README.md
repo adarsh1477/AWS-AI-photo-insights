@@ -59,13 +59,6 @@ AWS-AI-photo-insights/
 
 ---
 
-## 🔧 To Do
-
-- [ ] Add CodePipeline configuration (Step 6)
-- [ ] Include `buildspec.yml` for Lambda CI
-- [ ] Include `pipeline.yml` for frontend deployment
-
----
 
 ## 👨‍💻 Contributors
 
