@@ -2,7 +2,7 @@
 
 ## 🎥 Demo
 
-[![Watch the demo](https://img.youtube.com/vi/CtGnK63FB4s/maxresdefault.jpg)](https://youtu.be/CtGnK63FB4s)
+[![Watch the demo](https://img.youtube.com/vi/CtGnK63FB4s/maxresdefault.jpg)](https://www.youtube.com/watch?v=CtGnK63FB4s)
 
 An AI-powered photo search & upload system built with AWS Lambda, S3, Lex, Rekognition, and OpenSearch.
 
